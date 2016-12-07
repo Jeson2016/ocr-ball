@@ -1,3 +1,9 @@
 <resources>
     <string name="app_name">OcrBall</string>
+    <string name="introduce">OcrBall is a project to help recognise the characters in the pictures!</string>
+    <string name="button_select_image">Select Image</string>
+    <string name="button_active_ocr">Active Ocrball</string>
+    <string name="default_prompt">Please select one image!</string>
+    <string name="resault_title">The ocr resault is:</string>
+    <string name="resault_content">This is content!</string>
 </resources>
