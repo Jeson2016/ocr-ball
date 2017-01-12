@@ -7,4 +7,7 @@
     <dimen name="resault_text_title_size">36sp</dimen>
     <dimen name="resault_text_content_size">26sp</dimen>
     <dimen name="button_size">18sp</dimen>
+    <dimen name="ocrball_margin">5dp</dimen>
+    <dimen name="ocrballbg_width">40dp</dimen>
+    <dimen name="ocrball_width">30dp</dimen>
 </resources>

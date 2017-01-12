@@ -1,9 +1,16 @@
 package com.android.ocrball;
 
 import android.app.Activity;
+import android.content.ComponentName;
+import android.content.Intent;
+import android.content.ServiceConnection;
+import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
+import android.os.IBinder;
 import android.os.Message;
+import android.provider.Settings;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.LinearLayout;
@@ -11,7 +18,10 @@ import android.widget.TextView;
 
 public class WelcomeAcivity extends Activity {
     private static final String TAG = "OcrWelcome";
+    private static final boolean DEBUG = true || Log.isLoggable(TAG, Log.DEBUG);
+    private static final int REQUEST_CODE = 100;
 
+    private boolean mHasCriticalPermissions;
     private LinearLayout mOcrResaultLayout;
     private TextView mOcrResaultContent;
     private TextView mOcrPrompt;
@@ -29,8 +39,8 @@ public class WelcomeAcivity extends Activity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.welcome_acivity);
-
-        init();
+        requestAlertWindowPermission();
+        //init();
     }
 
     private void init() {
@@ -50,8 +60,49 @@ public class WelcomeAcivity extends Activity {
         mActiveButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-
+                startOcrBallService();
             }
         });
+    }
+
+    private void startOcrBallService(){
+        this.startService(new Intent(this, OcrBallService.class));
+        //this.bindService(new Intent(this, OcrBallService.class), mOcrBallService, Context.BIND_AUTO_CREATE);
+        this.finish();
+    }
+
+    private final ServiceConnection mOcrBallService = new ServiceConnection() {
+        @Override
+        public void onServiceConnected(ComponentName name, IBinder service) {
+            if (DEBUG) Log.v(TAG, "*** OcrBal connected (yay!)");
+        }
+
+        @Override
+        public void onServiceDisconnected(ComponentName name) {
+            if (DEBUG) Log.v(TAG, "*** Keyguard disconnected (boo!)");
+        }
+
+    };
+
+    private void requestAlertWindowPermission() {
+        if(!Settings.canDrawOverlays(this)){
+            Log.i(TAG,"requestAlertWindowPermission");
+            Intent intent = new Intent(Settings.ACTION_MANAGE_OVERLAY_PERMISSION);
+            intent.setData(Uri.parse("package:" + getPackageName()));
+            startActivityForResult(intent, REQUEST_CODE);
+        }else {
+            init();
+        }
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if (requestCode == REQUEST_CODE) {
+            if (Settings.canDrawOverlays(this)) {
+                Log.i(TAG, "onActivityResult granted");
+                init();
+            }
+        }
     }
 }
