@@ -19,9 +19,7 @@ import android.widget.TextView;
 public class WelcomeAcivity extends Activity {
     private static final String TAG = "OcrWelcome";
     private static final boolean DEBUG = true || Log.isLoggable(TAG, Log.DEBUG);
-    private static final int REQUEST_CODE = 100;
 
-    private boolean mHasCriticalPermissions;
     private LinearLayout mOcrResaultLayout;
     private TextView mOcrResaultContent;
     private TextView mOcrPrompt;
@@ -39,8 +37,7 @@ public class WelcomeAcivity extends Activity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.welcome_acivity);
-        requestAlertWindowPermission();
-        //init();
+        init();
     }
 
     private void init() {
@@ -84,25 +81,4 @@ public class WelcomeAcivity extends Activity {
 
     };
 
-    private void requestAlertWindowPermission() {
-        if(!Settings.canDrawOverlays(this)){
-            Log.i(TAG,"requestAlertWindowPermission");
-            Intent intent = new Intent(Settings.ACTION_MANAGE_OVERLAY_PERMISSION);
-            intent.setData(Uri.parse("package:" + getPackageName()));
-            startActivityForResult(intent, REQUEST_CODE);
-        }else {
-            init();
-        }
-    }
-
-    @Override
-    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        super.onActivityResult(requestCode, resultCode, data);
-        if (requestCode == REQUEST_CODE) {
-            if (Settings.canDrawOverlays(this)) {
-                Log.i(TAG, "onActivityResult granted");
-                init();
-            }
-        }
-    }
 }

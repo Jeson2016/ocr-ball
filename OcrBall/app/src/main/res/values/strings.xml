@@ -6,4 +6,6 @@
     <string name="default_prompt">Please select one image!</string>
     <string name="resault_title">The ocr resault is:</string>
     <string name="resault_content">This is content!</string>
+    <string name="back">back</string>
+    <string name="screenshot">screenshot</string>
 </resources>

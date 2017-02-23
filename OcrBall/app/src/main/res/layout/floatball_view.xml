@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="@dimen/ocrballbg_width"
+    android:layout_height="@dimen/ocrballbg_width"
+    android:background="@drawable/ocrball_bg" >
+    <View  android:layout_width="@dimen/ocrball_width"
+        android:layout_height="@dimen/ocrball_width"
+        android:layout_margin="@dimen/ocrball_margin"
+        android:background="@drawable/ocrball"
+        android:id="@+id/floatball">
+    </View>
+</FrameLayout>

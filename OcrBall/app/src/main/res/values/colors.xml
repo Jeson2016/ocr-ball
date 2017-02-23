@@ -6,4 +6,5 @@
     <color name="colorWirte">#FFFFFFFF</color>
     <color name="colorPanel">#22555555</color>
     <color name="colorDark">#FF000000</color>
+    <color name="colorImageButton">#00000000</color>
 </resources>
