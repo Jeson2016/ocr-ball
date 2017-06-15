@@ -1,35 +1,62 @@
 package com.android.ocrball;
 
 import android.app.Activity;
+import android.app.AlertDialog;
 import android.content.ComponentName;
 import android.content.Intent;
 import android.content.ServiceConnection;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Message;
-import android.provider.Settings;
+import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
+import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.ProgressBar;
+import android.widget.RadioButton;
+import android.widget.RadioGroup;
 import android.widget.TextView;
+import android.widget.Toast;
 
-public class WelcomeAcivity extends Activity {
+import com.android.ocrball.util.OCRSharedPrefsUtil;
+import com.android.ocrball.util.OcrConstants;
+import com.android.ocrball.util.OcrController;
+
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.InputStream;
+
+public class WelcomeAcivity extends AppCompatActivity {
     private static final String TAG = "OcrWelcome";
     private static final boolean DEBUG = true || Log.isLoggable(TAG, Log.DEBUG);
 
+    private OcrController mController;
+
+    private ImageView mOcrPhoto;
     private LinearLayout mOcrResaultLayout;
     private TextView mOcrResaultContent;
     private TextView mOcrPrompt;
+    private ProgressBar mOcrProgressBar;
+    private Button mCameraScanButton;
     private Button mSelectButton;
     private Button mActiveButton;
+    private AlertDialog mPlatFormSelectDialog;
+
 
     private Handler mHandler = new Handler(){
         @Override
         public void handleMessage(Message msg) {
-
+            mOcrProgressBar.setVisibility(View.INVISIBLE);
+            mOcrResaultContent.setText(msg.getData().getString(OcrConstants.OCR_RESULT));
         }
     };
 
@@ -37,20 +64,27 @@ public class WelcomeAcivity extends Activity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.welcome_acivity);
+
         init();
     }
 
     private void init() {
+        mController = new OcrController(WelcomeAcivity.this, mHandler);
+
+        mOcrPhoto = (ImageView) this.findViewById(R.id.ocr_photo_view);
         mOcrResaultLayout = (LinearLayout) this.findViewById(R.id.ocr_resault_layout);
         mOcrResaultContent = (TextView) this.findViewById(R.id.ocr_resault_textview);
         mOcrPrompt = (TextView) this.findViewById(R.id.default_prompt_textview);
+        mOcrProgressBar = (ProgressBar) this.findViewById(R.id.ocr_progressBar);
         mSelectButton = (Button) this.findViewById(R.id.select_button);
         mActiveButton = (Button) this.findViewById(R.id.active_button);
 
         mSelectButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-
+                Intent intent = new Intent(Intent.ACTION_PICK,
+                        android.provider.MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
+                startActivityForResult(intent, OcrConstants.OCR_REQUEST_PICK_PHOTO);
             }
         });
 
@@ -62,9 +96,119 @@ public class WelcomeAcivity extends Activity {
         });
     }
 
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.menu_main, menu);
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            case R.id.action_menu_platform:
+                showPlatFormSelectDialog();
+                break;
+            case R.id.action_menu_language:
+                break;
+            default:
+                //no thing to do
+                break;
+        }
+        return true;
+    }
+
+    private void showPlatFormSelectDialog() {
+        final RadioGroup radiosGroup = (RadioGroup) LayoutInflater.from(WelcomeAcivity.this)
+                .inflate(R.layout.platform_select_option, null);
+        final RadioButton tButton = (RadioButton) radiosGroup.findViewById(R.id.radio_platform_td);
+        final RadioButton bButton = (RadioButton) radiosGroup.findViewById(R.id.radio_platform_bt);
+        final RadioButton gButton = (RadioButton) radiosGroup.findViewById(R.id.radio_platform_google);
+
+         switch (OCRSharedPrefsUtil.getOcrPlatForm(WelcomeAcivity.this)) {
+            case OcrConstants.PLATFORM_TRAINEDDATA_VALUE:
+                tButton.setChecked(true);
+                break;
+            case OcrConstants.PLATFORM_BAIDU_VALUE:
+                bButton.setChecked(true);
+                break;
+            case OcrConstants.PLATFORM_GOOGLE_VALUE:
+                gButton.setChecked(true);
+                break;
+            default:
+                // no thing to do
+                break;
+        }
+
+        radiosGroup.setOnCheckedChangeListener(new RadioGroup.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(RadioGroup group, int checkedId) {
+                if (tButton.getId() == checkedId) {
+                    OCRSharedPrefsUtil.setOcrPlatForm(WelcomeAcivity.this,
+                            OcrConstants.PLATFORM_TRAINEDDATA_VALUE);
+                    mController.initTrainedData();
+                }
+                if (bButton.getId() == checkedId) {
+                    OCRSharedPrefsUtil.setOcrPlatForm(WelcomeAcivity.this,
+                            OcrConstants.PLATFORM_BAIDU_VALUE);
+                }
+                if (gButton.getId() == checkedId) {
+                    OCRSharedPrefsUtil.setOcrPlatForm(WelcomeAcivity.this,
+                            OcrConstants.PLATFORM_GOOGLE_VALUE);
+                }
+                if (null!=mPlatFormSelectDialog && mPlatFormSelectDialog.isShowing()) {
+                    mPlatFormSelectDialog.dismiss();
+                }
+            }
+        });
+
+        AlertDialog.Builder builder = new AlertDialog.Builder(WelcomeAcivity.this);
+        builder.setTitle(R.string.platform_dialog_title);
+        builder.setView(radiosGroup);
+        mPlatFormSelectDialog = builder.create();
+        mPlatFormSelectDialog.show();
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent intent) {
+        if ((requestCode == OcrConstants.OCR_REQUEST_PICK_PHOTO)
+                && (resultCode == Activity.RESULT_OK)) {
+            if (null != intent) {
+                Uri photoUri = (Uri) intent.getData();
+                if (null != photoUri) {
+                    updateUiFromUri(photoUri);
+                    mController.getOcrResultByUri(WelcomeAcivity.this, mHandler, photoUri);
+                }
+            }
+        }
+    }
+
+    private void updateUiFromUri(Uri photoUri) {
+        if (null != photoUri) {
+            InputStream is = null;
+            try {
+                is = WelcomeAcivity.this.getContentResolver().openInputStream(photoUri);
+                Bitmap bitmap = BitmapFactory.decodeStream(is);
+                mOcrPhoto.setImageBitmap(bitmap);
+            } catch (FileNotFoundException e) {
+                e.printStackTrace();
+            } finally {
+                if (is != null) {
+                    try {
+                        is.close();
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                }
+            }
+        }
+        mOcrPrompt.setVisibility(View.INVISIBLE);
+        mOcrResaultLayout.setVisibility(View.VISIBLE);
+        mOcrResaultContent.setText("");
+        mOcrProgressBar.setVisibility(View.VISIBLE);
+    }
+
     private void startOcrBallService(){
         this.startService(new Intent(this, OcrBallService.class));
-        //this.bindService(new Intent(this, OcrBallService.class), mOcrBallService, Context.BIND_AUTO_CREATE);
         this.finish();
     }
 
@@ -78,7 +222,5 @@ public class WelcomeAcivity extends Activity {
         public void onServiceDisconnected(ComponentName name) {
             if (DEBUG) Log.v(TAG, "*** Keyguard disconnected (boo!)");
         }
-
     };
-
 }
