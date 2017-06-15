@@ -37,6 +37,7 @@ public class OcrBallService extends Service{
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
         if(DEBUG) Log.i(TAG,"onStartCommand");
+        createView();
         return super.onStartCommand(intent, flags, startId);
     }
 
@@ -44,8 +45,6 @@ public class OcrBallService extends Service{
     public void onCreate() {
         super.onCreate();
         if(DEBUG) Log.i(TAG,"onCreate");
-
-        createView();
     }
 
     private void createView(){

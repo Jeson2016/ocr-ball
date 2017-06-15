@@ -1,6 +1,7 @@
 package com.android.ocrball.view;
 
 import android.content.Context;
+import android.content.Intent;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -13,6 +14,7 @@ import android.widget.LinearLayout;
 
 import com.android.ocrball.OcrBallService;
 import com.android.ocrball.R;
+import com.android.ocrball.ScreenShotActivity;
 import com.android.ocrball.manager.MyWindowManager;
 
 /**
@@ -42,6 +44,10 @@ public class OcrBallView extends LinearLayout {
         public void onClick(View v) {
             if(DEBUG)
               Log.i(TAG, "ScreenShotButton Click");
+            Intent intent = new Intent(v.getContext(), ScreenShotActivity.class);
+            intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+            v.getContext().startActivity(intent);
+            MyWindowManager.removeOcrBallView(getContext());
 
         }
     };

@@ -20,4 +20,11 @@
     <string name="language_chi_sim">chi_sim</string>
     <string name="language_chi_tra">chi_tra</string>
     <string name="language_dialog_title">Choce one platform for your OCR!</string>
+
+    <string name="title_activity_screen_shot">ScreenShotActivity</string>
+    <string name="can_not_capture_under_5_0">System under 5.0 does not support screenshots</string>
+    <string name="screen_capture_fail">Sorry for capturing screen fail</string>
+    <string name="file_notexist">This screenshot file is not found!</string>
+    <string name="file_savesuccess">"screenshot save success"</string>
+
 </resources>

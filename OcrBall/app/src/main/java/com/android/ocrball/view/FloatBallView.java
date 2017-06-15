@@ -86,6 +86,8 @@ public class FloatBallView extends FrameLayout {
                 updateViewPosition();
                 break;
             case MotionEvent.ACTION_UP:
+                Log.i(TAG,"xInScreen : "+ xInScreen + " , xDownInScreen : " + xDownInScreen);
+                Log.i(TAG,"yInScreen : "+ yInScreen + " , yDownInScreen : " + yDownInScreen);
                 if(xInScreen == xDownInScreen && yInScreen == yDownInScreen){
                     openOcrBallView();
                 }

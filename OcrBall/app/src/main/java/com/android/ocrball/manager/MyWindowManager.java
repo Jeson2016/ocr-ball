@@ -1,5 +1,6 @@
 package com.android.ocrball.manager;
 
+import android.app.Activity;
 import android.content.Context;
 import android.graphics.PixelFormat;
 import android.util.Log;
@@ -32,6 +33,7 @@ public class MyWindowManager {
     }
 
     public static void createFloatBallView(Context context){
+        Log.i(TAG,"createFloatBallView mFloatBallView = "+ mFloatBallView);
         if(mFloatBallView == null){
             WindowManager windowManager = getWindowManager(context);
             mFloatBallView = new FloatBallView(context);

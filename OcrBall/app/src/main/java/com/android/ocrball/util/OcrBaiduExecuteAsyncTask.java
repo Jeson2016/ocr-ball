@@ -32,6 +32,7 @@ public class OcrBaiduExecuteAsyncTask extends AsyncTask {
     private Handler mHandler;
     private Uri mUri;
     private Bitmap mBitmap;
+    private File mFileBitmap;
     private GeneralBasicParams mParams;
     private StringBuilder mResult;
 
@@ -46,12 +47,24 @@ public class OcrBaiduExecuteAsyncTask extends AsyncTask {
         OCR.getInstance().initWithToken(mContext, OcrConstants.OCR_BAIDU_TOKEN);
     }
 
+    public OcrBaiduExecuteAsyncTask(Context context, Handler handler, File bitmap) {
+        mContext = context;
+        mHandler = handler;
+        mFileBitmap = bitmap;
+        mResult = new StringBuilder();
+        mParams = new GeneralBasicParams();
+        mParams.setDetectDirection(true);
+        OCR.getInstance().initWithToken(mContext, OcrConstants.OCR_BAIDU_TOKEN);
+    }
+
     @Override
     protected Object doInBackground(Object[] params) {
         if (null != mUri) {
             mParams.setImageFile(getFileByUri());
         } else if (null != mBitmap) {
             mParams.setImageFile(getTempBitmapFile());
+        } else if(null != mFileBitmap){
+            mParams.setImageFile(mFileBitmap);
         }
 
         OCR.getInstance().recognizeGeneralBasic(mParams, new OnResultListener<GeneralResult>() {

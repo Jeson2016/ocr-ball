@@ -34,10 +34,14 @@ import android.widget.TextView;
 import com.android.ocrball.util.OCRSharedPrefsUtil;
 import com.android.ocrball.util.OcrConstants;
 import com.android.ocrball.util.OcrController;
+import com.android.ocrball.util.ScreenCapture;
 
+import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
 
 public class WelcomeAcivity extends AppCompatActivity {
     private static final String TAG = "OcrWelcome";
@@ -84,7 +88,27 @@ public class WelcomeAcivity extends AppCompatActivity {
             }
         }
 
-        if (mShouldBeginInit) init();
+        if (mShouldBeginInit) {
+            init();
+
+            Intent intent = getIntent();
+            if (null != intent) {
+                String filename = intent.getStringExtra(ScreenCapture.FILE_NAME);
+                int status = intent.getIntExtra(ScreenCapture.MESSAGE, ScreenCapture.CreateFail);
+                if (ScreenCapture.CreateSuccess == status && !filename.isEmpty()) {
+                    Log.i(TAG, "onCreate: filename = " + filename + ", status = " + status);
+                    //  filename = "/sdcard/Pictures/Screenshots/11.png";
+                    //  filename = "/data/user/0/com.android.ocrball/files/11.png";
+                    File file = new File(filename);
+                    Bitmap bitmap = getBitmapFromFileName(filename);
+                    if (null != bitmap && null != file) {
+                        Log.i(TAG, "onCreate: updateUiFromBitmap  & getOcrResultFile");
+                        updateUiFromBitmap(bitmap);
+                        mController.getOcrResultFile(WelcomeAcivity.this, mHandler, file);
+                    }
+                }
+            }
+        }
     }
 
     private void init() {
@@ -317,6 +341,24 @@ public class WelcomeAcivity extends AppCompatActivity {
         mOcrResaultLayout.setVisibility(View.VISIBLE);
         mOcrResaultContent.setText("");
         mOcrProgressBar.setVisibility(View.VISIBLE);
+    }
+
+    private void updateUiFromBitmap(Bitmap bitmap) {
+        if(null != bitmap){
+            mOcrPhoto.setImageBitmap(bitmap);
+        }
+        mOcrPrompt.setVisibility(View.INVISIBLE);
+        mOcrResaultLayout.setVisibility(View.VISIBLE);
+        mOcrResaultContent.setText("");
+        mOcrProgressBar.setVisibility(View.VISIBLE);
+    }
+
+    private Bitmap getBitmapFromFileName(String filename){
+        Bitmap bitmap = null;
+        if (!filename.isEmpty()) {
+            bitmap = BitmapFactory.decodeFile(filename);
+        }
+        return bitmap;
     }
 
     private void startOcrBallService(){

@@ -27,6 +27,10 @@
                 <data android:mimeType="image/*" />
             </intent-filter>
         </activity>
+        <activity android:name=".ScreenShotActivity"
+            android:label="@string/title_activity_screen_shot"
+            android:theme="@android:style/Theme.Translucent.NoTitleBar">
+        </activity>
 
         <service android:name=".OcrBallService"/>
 
