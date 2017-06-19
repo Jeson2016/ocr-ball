@@ -33,6 +33,7 @@ public class OcrController {
                 new OcrTrainedDataExecuteAsyncTask(context, handler, uri, null).execute();
                 break;
             case OcrConstants.PLATFORM_BAIDU_VALUE:
+                new OcrBaiduExecuteAsyncTask(context, handler, uri).execute();
                 break;
             case OcrConstants.PLATFORM_GOOGLE_VALUE:
                 break;

@@ -34,6 +34,7 @@ public class OcrConstants {
     public static final int PLATFORM_GOOGLE_VALUE = 2;
 
     public static final String OCR_RESULT = "result";
+    public static final String OCR_BAIDU_TOKEN = "24.6d2eb8a73ed14037958fd2c882a5d806.2592000.1500197762.282335-9774268";
 
     public static final int MSG_GET_RESULT_FROM_URI = 10000;
     public static final int MSG_GET_RESULT_FROM_BITMAP = MSG_GET_RESULT_FROM_URI+1;
