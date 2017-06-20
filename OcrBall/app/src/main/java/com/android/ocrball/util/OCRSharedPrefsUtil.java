@@ -13,15 +13,15 @@ import com.android.ocrball.WelcomeAcivity;
 public class OCRSharedPrefsUtil {
     private static final String SETTING = "Setting";
 
-    public static void setOcrPlatForm(Context context, int platForm) {
+    public static void setOcrPlatForm(Context context, String platForm) {
         Editor sp =  context.getSharedPreferences(SETTING, Context.MODE_PRIVATE).edit();
-        sp.putInt(OcrConstants.OCR_SETTING_PLATFORM, platForm);
+        sp.putString(OcrConstants.OCR_SETTING_PLATFORM, platForm);
         sp.commit();
     }
 
-    public static int getOcrPlatForm(Context context) {
+    public static String getOcrPlatForm(Context context) {
         SharedPreferences sp =  context.getSharedPreferences(SETTING, Context.MODE_PRIVATE);
-        int value = sp.getInt(OcrConstants.OCR_SETTING_PLATFORM, OcrConstants.OCR_INT_ZERO);
+        String value = sp.getString(OcrConstants.OCR_SETTING_PLATFORM, OcrConstants.OCR_PLATFORM_TESSERACT);
         return value;
     }
 

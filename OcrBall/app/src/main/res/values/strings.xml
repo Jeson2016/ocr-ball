@@ -1,4 +1,4 @@
-<resources>
+<resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="app_name">OcrBall</string>
     <string name="button_camera_scan">Camera\nScan</string>
     <string name="button_select_image">Select\nImage</string>
@@ -9,11 +9,15 @@
     <string name="back">back</string>
     <string name="screenshot">screenshot</string>
 
-    <string name="action_menu_platform_title">Platform</string>
-    <string name="platform_td">TD_Mode</string>
-    <string name="platform_bd">Baidu_Mode</string>
-    <string name="platform_google">Google_mode</string>
+    <string name="action_menu_platform_title">Platform - <xliff:g>%s</xliff:g></string>
+    <string name="platform_td">Tesseract</string>
+    <string name="platform_bd">Baidu</string>
+    <string name="platform_google">Google</string>
     <string name="platform_dialog_title">Choce one platform for your OCR!</string>
 
-    <string name="action_menu_language_title">Launuage</string>
+    <string name="action_menu_language_title">Launuage - <xliff:g>%s</xliff:g></string>
+    <string name="language_eng">eng</string>
+    <string name="language_chi_sim">chi_sim</string>
+    <string name="language_chi_tra">chi_tra</string>
+    <string name="language_dialog_title">Choce one platform for your OCR!</string>
 </resources>

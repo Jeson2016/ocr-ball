@@ -18,7 +18,7 @@ public class OcrController {
         mContext = context;
         mActivityHandler = handler;
 
-        if (OCRSharedPrefsUtil.getOcrPlatForm(mContext) == OcrConstants.PLATFORM_TRAINEDDATA_VALUE) {
+        if (OCRSharedPrefsUtil.getOcrPlatForm(mContext).equals(OcrConstants.OCR_PLATFORM_TESSERACT)) {
             new OcrTrainedDataInitAsyncTask(mContext, mActivityHandler).execute();
         }
     }
@@ -27,23 +27,19 @@ public class OcrController {
         new OcrTrainedDataInitAsyncTask(mContext, mActivityHandler).execute();
     }
 
-    public void getOcrResultByUri(Context context, Handler handler, Uri uri) {
+    public void getOcrResult(Context context, Handler handler, Uri uri, Bitmap bitmap) {
         switch (OCRSharedPrefsUtil.getOcrPlatForm(context)) {
-            case OcrConstants.PLATFORM_TRAINEDDATA_VALUE:
-                new OcrTrainedDataExecuteAsyncTask(context, handler, uri, null).execute();
+            case OcrConstants.OCR_PLATFORM_TESSERACT:
+                new OcrTrainedDataExecuteAsyncTask(context, handler, uri, bitmap).execute();
                 break;
-            case OcrConstants.PLATFORM_BAIDU_VALUE:
-                new OcrBaiduExecuteAsyncTask(context, handler, uri).execute();
+            case OcrConstants.OCR_PLATFORM_BAIDU:
+                new OcrBaiduExecuteAsyncTask(context, handler, uri, bitmap).execute();
                 break;
-            case OcrConstants.PLATFORM_GOOGLE_VALUE:
+            case OcrConstants.OCR_PLATFORM_GOOGLE:
                 break;
             default:
                 // no thing to do
                 break;
         }
-    }
-
-    public void getOcrResultByBitmap(Bitmap bitmap, Context context, Handler handler) {
-
     }
 }

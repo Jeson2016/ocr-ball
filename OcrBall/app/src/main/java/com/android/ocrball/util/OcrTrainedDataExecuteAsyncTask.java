@@ -9,6 +9,7 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
 
+import com.googlecode.leptonica.android.Pixa;
 import com.googlecode.tesseract.android.TessBaseAPI;
 
 import java.io.FileNotFoundException;
@@ -33,7 +34,7 @@ public class OcrTrainedDataExecuteAsyncTask extends AsyncTask {
         mBitmap = bitmap;
 
         mTess = new TessBaseAPI();
-        mTess.init(OcrConstants.TESS_DIR, OCRSharedPrefsUtil.getOcrLanguage(context));
+        mTess.init(OcrConstants.TESS_DIR, OCRSharedPrefsUtil.getOcrLanguage(context), TessBaseAPI.OEM_TESSERACT_ONLY);
     }
 
     @Override

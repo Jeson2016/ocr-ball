@@ -50,6 +50,9 @@ public class WelcomeAcivity extends AppCompatActivity {
     private Button mSelectButton;
     private Button mActiveButton;
     private AlertDialog mPlatFormSelectDialog;
+    private AlertDialog mLanguageSelectDialog;
+    private MenuItem mPlatFormItem;
+    private MenuItem mLanguageItem;
 
 
     private Handler mHandler = new Handler(){
@@ -99,6 +102,18 @@ public class WelcomeAcivity extends AppCompatActivity {
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.menu_main, menu);
+        mPlatFormItem = menu.findItem(R.id.action_menu_platform);
+        mLanguageItem = menu.findItem(R.id.action_menu_language);
+
+        mPlatFormItem.setTitle(WelcomeAcivity.this.getResources().getString(
+                R.string.action_menu_platform_title,
+                OCRSharedPrefsUtil.getOcrPlatForm(WelcomeAcivity.this)
+        ));
+        mLanguageItem.setTitle(WelcomeAcivity.this.getResources().getString(
+                R.string.action_menu_language_title,
+                OCRSharedPrefsUtil.getOcrLanguage(WelcomeAcivity.this)
+        ));
+
         return true;
     }
 
@@ -109,6 +124,7 @@ public class WelcomeAcivity extends AppCompatActivity {
                 showPlatFormSelectDialog();
                 break;
             case R.id.action_menu_language:
+                showLanguageSelectDialog();
                 break;
             default:
                 //no thing to do
@@ -123,15 +139,18 @@ public class WelcomeAcivity extends AppCompatActivity {
         final RadioButton tButton = (RadioButton) radiosGroup.findViewById(R.id.radio_platform_td);
         final RadioButton bButton = (RadioButton) radiosGroup.findViewById(R.id.radio_platform_bt);
         final RadioButton gButton = (RadioButton) radiosGroup.findViewById(R.id.radio_platform_google);
+        gButton.setClickable(false);
 
          switch (OCRSharedPrefsUtil.getOcrPlatForm(WelcomeAcivity.this)) {
-            case OcrConstants.PLATFORM_TRAINEDDATA_VALUE:
+            case OcrConstants.OCR_PLATFORM_TESSERACT:
                 tButton.setChecked(true);
+                mLanguageItem.setVisible(false);
                 break;
-            case OcrConstants.PLATFORM_BAIDU_VALUE:
+            case OcrConstants.OCR_PLATFORM_BAIDU:
                 bButton.setChecked(true);
+                mLanguageItem.setVisible(true);
                 break;
-            case OcrConstants.PLATFORM_GOOGLE_VALUE:
+            case OcrConstants.OCR_PLATFORM_GOOGLE:
                 gButton.setChecked(true);
                 break;
             default:
@@ -144,20 +163,24 @@ public class WelcomeAcivity extends AppCompatActivity {
             public void onCheckedChanged(RadioGroup group, int checkedId) {
                 if (tButton.getId() == checkedId) {
                     OCRSharedPrefsUtil.setOcrPlatForm(WelcomeAcivity.this,
-                            OcrConstants.PLATFORM_TRAINEDDATA_VALUE);
+                            OcrConstants.OCR_PLATFORM_TESSERACT);
                     mController.initTrainedData();
                 }
                 if (bButton.getId() == checkedId) {
                     OCRSharedPrefsUtil.setOcrPlatForm(WelcomeAcivity.this,
-                            OcrConstants.PLATFORM_BAIDU_VALUE);
+                            OcrConstants.OCR_PLATFORM_BAIDU);
                 }
                 if (gButton.getId() == checkedId) {
                     OCRSharedPrefsUtil.setOcrPlatForm(WelcomeAcivity.this,
-                            OcrConstants.PLATFORM_GOOGLE_VALUE);
+                            OcrConstants.OCR_PLATFORM_GOOGLE);
                 }
                 if (null!=mPlatFormSelectDialog && mPlatFormSelectDialog.isShowing()) {
                     mPlatFormSelectDialog.dismiss();
                 }
+                mPlatFormItem.setTitle(WelcomeAcivity.this.getResources().getString(
+                        R.string.action_menu_platform_title,
+                        OCRSharedPrefsUtil.getOcrPlatForm(WelcomeAcivity.this)
+                ));
             }
         });
 
@@ -168,6 +191,62 @@ public class WelcomeAcivity extends AppCompatActivity {
         mPlatFormSelectDialog.show();
     }
 
+    private void showLanguageSelectDialog() {
+        final RadioGroup radiosGroup = (RadioGroup) LayoutInflater.from(WelcomeAcivity.this)
+                .inflate(R.layout.language_select_option, null);
+        final RadioButton eButton = (RadioButton) radiosGroup.findViewById(R.id.radio_language_eng);
+        final RadioButton sButton = (RadioButton) radiosGroup.findViewById(R.id.radio_language_chi_sim);
+        final RadioButton tButton = (RadioButton) radiosGroup.findViewById(R.id.radio_language_chi_tra);
+        sButton.setClickable(false);
+        tButton.setClickable(false);
+
+        switch (OCRSharedPrefsUtil.getOcrLanguage(WelcomeAcivity.this)) {
+            case OcrConstants.OCR_LANGUAGE_ENG:
+                eButton.setChecked(true);
+                break;
+            case OcrConstants.OCR_LANGUAGE_CHI_S:
+                sButton.setChecked(true);
+                break;
+            case OcrConstants.OCR_LANGUAGE_CHI_T:
+                tButton.setChecked(true);
+                break;
+            default:
+                // no thing to do
+                break;
+        }
+
+        radiosGroup.setOnCheckedChangeListener(new RadioGroup.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(RadioGroup group, int checkedId) {
+                if (eButton.getId() == checkedId) {
+                    OCRSharedPrefsUtil.setOcrLanguage(WelcomeAcivity.this,
+                            OcrConstants.OCR_LANGUAGE_ENG);
+                }
+                if (sButton.getId() == checkedId) {
+                    OCRSharedPrefsUtil.setOcrLanguage(WelcomeAcivity.this,
+                            OcrConstants.OCR_LANGUAGE_CHI_S);
+                }
+                if (tButton.getId() == checkedId) {
+                    OCRSharedPrefsUtil.setOcrLanguage(WelcomeAcivity.this,
+                            OcrConstants.OCR_LANGUAGE_CHI_T);
+                }
+                if (null!=mLanguageSelectDialog && mLanguageSelectDialog.isShowing()) {
+                    mLanguageSelectDialog.dismiss();
+                }
+                mLanguageItem.setTitle(WelcomeAcivity.this.getResources().getString(
+                        R.string.action_menu_language_title,
+                        OCRSharedPrefsUtil.getOcrLanguage(WelcomeAcivity.this)
+                ));
+            }
+        });
+
+        AlertDialog.Builder builder = new AlertDialog.Builder(WelcomeAcivity.this);
+        builder.setTitle(R.string.language_dialog_title);
+        builder.setView(radiosGroup);
+        mLanguageSelectDialog = builder.create();
+        mLanguageSelectDialog.show();
+    }
+
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent intent) {
         if ((requestCode == OcrConstants.OCR_REQUEST_PICK_PHOTO)
@@ -176,7 +255,7 @@ public class WelcomeAcivity extends AppCompatActivity {
                 Uri photoUri = (Uri) intent.getData();
                 if (null != photoUri) {
                     updateUiFromUri(photoUri);
-                    mController.getOcrResultByUri(WelcomeAcivity.this, mHandler, photoUri);
+                    mController.getOcrResult(WelcomeAcivity.this, mHandler, photoUri, null);
                 }
             }
         }

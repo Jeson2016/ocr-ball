@@ -2,6 +2,8 @@ package com.android.ocrball.util;
 
 import android.content.Context;
 import android.database.Cursor;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -16,7 +18,10 @@ import com.baidu.ocr.sdk.model.GeneralBasicParams;
 import com.baidu.ocr.sdk.model.GeneralResult;
 import com.baidu.ocr.sdk.model.WordSimple;
 
+import java.io.BufferedOutputStream;
 import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
 
 /**
  * Created by admin on 2017/06/19   .
@@ -26,13 +31,15 @@ public class OcrBaiduExecuteAsyncTask extends AsyncTask {
     private Context mContext;
     private Handler mHandler;
     private Uri mUri;
+    private Bitmap mBitmap;
     private GeneralBasicParams mParams;
     private StringBuilder mResult;
 
-    public OcrBaiduExecuteAsyncTask(Context context, Handler handler, Uri uri) {
+    public OcrBaiduExecuteAsyncTask(Context context, Handler handler, Uri uri, Bitmap bitmap) {
         mContext = context;
         mHandler = handler;
         mUri = uri;
+        mBitmap = bitmap;
         mResult = new StringBuilder();
         mParams = new GeneralBasicParams();
         mParams.setDetectDirection(true);
@@ -41,7 +48,12 @@ public class OcrBaiduExecuteAsyncTask extends AsyncTask {
 
     @Override
     protected Object doInBackground(Object[] params) {
-        mParams.setImageFile(getFileByUri());
+        if (null != mUri) {
+            mParams.setImageFile(getFileByUri());
+        } else if (null != mBitmap) {
+            mParams.setImageFile(getTempBitmapFile());
+        }
+
         OCR.getInstance().recognizeGeneralBasic(mParams, new OnResultListener<GeneralResult>() {
             @Override
             public void onResult(GeneralResult result) {
@@ -77,5 +89,18 @@ public class OcrBaiduExecuteAsyncTask extends AsyncTask {
         cursor.close();
 
         return new File(FilePath);
+    }
+
+    private File getTempBitmapFile(){
+        File tempFile = new File(OcrConstants.TESS_TEMP_FILE);
+        try {
+            BufferedOutputStream bos = new BufferedOutputStream(new FileOutputStream(tempFile));
+            mBitmap.compress(Bitmap.CompressFormat.JPEG, 100, bos);
+            bos.flush();
+            bos.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return tempFile;
     }
 }
