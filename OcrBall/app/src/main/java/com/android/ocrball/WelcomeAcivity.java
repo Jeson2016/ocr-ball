@@ -5,13 +5,18 @@ import android.app.AlertDialog;
 import android.content.ComponentName;
 import android.content.Intent;
 import android.content.ServiceConnection;
+import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Message;
+import android.support.annotation.NonNull;
+import android.support.v4.app.ActivityCompat;
+import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -25,7 +30,6 @@ import android.widget.ProgressBar;
 import android.widget.RadioButton;
 import android.widget.RadioGroup;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.android.ocrball.util.OCRSharedPrefsUtil;
 import com.android.ocrball.util.OcrConstants;
@@ -53,7 +57,7 @@ public class WelcomeAcivity extends AppCompatActivity {
     private AlertDialog mLanguageSelectDialog;
     private MenuItem mPlatFormItem;
     private MenuItem mLanguageItem;
-
+    private boolean mShouldBeginInit = true;
 
     private Handler mHandler = new Handler(){
         @Override
@@ -68,7 +72,19 @@ public class WelcomeAcivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.welcome_acivity);
 
-        init();
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            for (String permission : OcrConstants.OCR_PERMISSIONS) {
+                int i = ContextCompat.checkSelfPermission(WelcomeAcivity.this, permission);
+                if (i != PackageManager.PERMISSION_GRANTED) {
+                    mShouldBeginInit = false;
+                    ActivityCompat.requestPermissions(WelcomeAcivity.this, OcrConstants.OCR_PERMISSIONS,
+                            OcrConstants.OCR_REQUEST_PERMISSIONS);
+                    break;
+                }
+            }
+        }
+
+        if (mShouldBeginInit) init();
     }
 
     private void init() {
@@ -249,6 +265,7 @@ public class WelcomeAcivity extends AppCompatActivity {
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent intent) {
+        super.onActivityResult(requestCode, resultCode, intent);
         if ((requestCode == OcrConstants.OCR_REQUEST_PICK_PHOTO)
                 && (resultCode == Activity.RESULT_OK)) {
             if (null != intent) {
@@ -257,6 +274,22 @@ public class WelcomeAcivity extends AppCompatActivity {
                     updateUiFromUri(photoUri);
                     mController.getOcrResult(WelcomeAcivity.this, mHandler, photoUri, null);
                 }
+            }
+        }
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+        if (requestCode == OcrConstants.OCR_REQUEST_PERMISSIONS) {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                for (int grantResult : grantResults) {
+                    if (grantResult != PackageManager.PERMISSION_GRANTED) {
+                        WelcomeAcivity.this.finish();
+                    }
+                }
+                mShouldBeginInit = true;
+                init();
             }
         }
     }
